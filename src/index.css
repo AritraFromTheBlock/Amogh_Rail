@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F8F9FA;
+    --bg-panel: #FFFFFF;
+    --border-hairline: rgba(15, 44, 92, 0.10);
+    --border-hairline-dark: rgba(15, 44, 92, 0.16);
+    --text-primary: #0F2C5C;
+    --text-secondary: #5B6478;
+    --text-muted: #8C95A6;
+    --brand-navy: #0F2C5C;
+    --accent-orange: #F5821F;
+    
+    --signal-clear: #1E7F4F;
+    --signal-caution: #B9790A;
+    --signal-danger: #C23636;
+    --signal-info: #2F5FD1;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+}
+
+/* Mission Critical Control Room Hairline Borders & Precise Elements */
+.border-hairline {
+  border-color: rgba(15, 44, 92, 0.10);
+}
+
+.border-hairline-b {
+  border-bottom: 1px solid rgba(15, 44, 92, 0.10);
+}
+
+.border-hairline-t {
+  border-top: 1px solid rgba(15, 44, 92, 0.10);
+}
+
+.border-hairline-r {
+  border-right: 1px solid rgba(15, 44, 92, 0.10);
+}
+
+.border-hairline-l {
+  border-left: 1px solid rgba(15, 44, 92, 0.10);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(15, 44, 92, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 44, 92, 0.25);
+}
