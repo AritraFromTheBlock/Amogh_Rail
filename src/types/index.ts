@@ -13,9 +13,25 @@ export interface Train {
   scheduledTime: string;
   destination: string;
   speed?: number;
-  priority?: 'High' | 'Express' | 'Passenger' | 'Freight';
+  priority?: 'High' | 'Express' | 'Passenger' | 'Freight' | string;
   currentTrack?: string;
   nextStation?: string;
+  
+  trainType?: string;
+  priorityLevel?: number;
+  sectionId?: string;
+  scheduledArrival?: string;
+  scheduledDeparture?: string;
+  actualArrival?: string;
+  dayOfWeek?: number;
+  isWeekend?: boolean;
+  timeOfDayBucket?: string;
+  season?: string;
+  upstreamDelayMin?: number;
+  sectionCongestionLevel?: number;
+  weatherFlag?: number;
+  trackType?: string;
+  delayMin?: number;
 }
 
 export type CorridorStatus = 'NORMAL' | 'HIGH' | 'CRITICAL';

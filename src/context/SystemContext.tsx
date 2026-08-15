@@ -57,6 +57,27 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     timezone: 'Asia/Kolkata'
   });
 
+  // Handle Dark Mode and Accent Color globally
+  useEffect(() => {
+    // Theme
+    if (settings.theme === 'Dark') {
+      document.documentElement.classList.add('dark');
+    } else if (settings.theme === 'Light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      // System
+      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (systemDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+
+    // Accent Color
+    document.documentElement.style.setProperty('--color-accent', settings.accentColor);
+  }, [settings.theme, settings.accentColor]);
+
   // Real-time IST Clock (updates every second with IST timezone and en-IN formatting)
   useEffect(() => {
     const updateTime = () => {

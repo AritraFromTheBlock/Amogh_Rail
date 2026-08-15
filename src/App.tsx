@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SystemProvider, useSystem } from './context/SystemContext';
+import { ToastProvider } from './context/ToastContext';
 import { Layout } from './components/layout/Layout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -10,6 +11,7 @@ import { Optimization } from './pages/Optimization';
 import { Simulation } from './pages/Simulation';
 import { Analytics } from './pages/Analytics';
 import { Settings } from './pages/Settings';
+import { SplashScreen } from './components/common/SplashScreen';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -48,12 +50,19 @@ const AppContent: React.FC = () => {
 };
 
 export function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
-    <AuthProvider>
-      <SystemProvider>
-        <AppContent />
-      </SystemProvider>
-    </AuthProvider>
+    <ToastProvider>
+      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+      {!showSplash && (
+        <AuthProvider>
+          <SystemProvider>
+            <AppContent />
+          </SystemProvider>
+        </AuthProvider>
+      )}
+    </ToastProvider>
   );
 }
 

@@ -1,49 +1,22 @@
 import React from 'react';
+import { useSystem } from '../context/SystemContext';
 import { StatCard } from '../components/common/StatCard';
 import { StatusBadge } from '../components/common/StatusBadge';
-import { WEEKLY_PERFORMANCE } from '../data/mockData';
+import { WEEKLY_PERFORMANCE } from '../data/analyticsData';
 
 export const Analytics: React.FC = () => {
-  const departures = [
-    {
-      train: '12967',
-      destination: 'Mumbai Central',
-      platform: 'P3',
-      scheduled: '14:50',
-      status: 'DELAYED 18M'
-    },
-    {
-      train: '12002',
-      destination: 'Kalka',
-      platform: 'P1',
-      scheduled: '15:00',
-      status: 'ON TIME'
-    },
-    {
-      train: '12884',
-      destination: 'Patna Jn',
-      platform: 'P5',
-      scheduled: '15:25',
-      status: 'BOARDING'
-    },
-    {
-      train: '12425',
-      destination: 'Kanpur Central',
-      platform: 'P2',
-      scheduled: '15:40',
-      status: 'ON TIME'
-    }
-  ];
+  const { trains } = useSystem();
+  const departures = trains.slice(0, 8); // Top 8 trains
 
   return (
     <div className="space-y-10 max-w-7xl">
       
       {/* Title Header matching Figma */}
       <div className="flex items-baseline gap-3">
-        <h1 className="text-xl font-semibold text-[#0F2C5C] tracking-tight">
+        <h1 className="text-xl font-semibold text-[#0F2C5C] dark:text-white tracking-tight transition-colors">
           Analytics
         </h1>
-        <span className="font-mono text-[11px] text-[#5B6478] uppercase tracking-wider">
+        <span className="font-mono text-[11px] text-[#5B6478] dark:text-gray-400 uppercase tracking-wider transition-colors">
           Northern Zone Control Room
         </span>
       </div>
@@ -70,7 +43,7 @@ export const Analytics: React.FC = () => {
 
       {/* Weekly On-Time Performance Bar Chart matching Figma */}
       <div className="space-y-4 pt-4">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-[#5B6478]">
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-[#5B6478] dark:text-gray-400 transition-colors">
           WEEKLY ON-TIME PERFORMANCE
         </div>
 
@@ -82,7 +55,7 @@ export const Analytics: React.FC = () => {
               return (
                 <div key={item.day} className="flex flex-col items-center gap-2 h-full justify-end group">
                   {/* Percentage label */}
-                  <span className="font-mono text-[11px] text-[#5B6478]">
+                  <span className="font-mono text-[11px] text-[#5B6478] dark:text-gray-400 transition-colors">
                     {item.percentage}%
                   </span>
 
@@ -91,7 +64,7 @@ export const Analytics: React.FC = () => {
                     <div
                       className={`w-full max-w-[48px] transition-all duration-500 rounded-none ${
                         item.highlight 
-                          ? 'bg-[#2F5FD1]' 
+                          ? 'bg-[#2F5FD1] dark:bg-[#4dabf7]' 
                           : 'bg-transparent'
                       }`}
                       style={{
@@ -101,7 +74,7 @@ export const Analytics: React.FC = () => {
                   </div>
 
                   {/* Day label */}
-                  <span className="font-sans text-xs text-[#5B6478] font-medium mt-1">
+                  <span className="font-sans text-xs text-[#5B6478] dark:text-gray-400 font-medium mt-1 transition-colors">
                     {item.day}
                   </span>
                 </div>
@@ -113,14 +86,14 @@ export const Analytics: React.FC = () => {
 
       {/* Live Departure Schedule Section matching Figma */}
       <div className="space-y-4 pt-4">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-[#5B6478]">
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-[#5B6478] dark:text-gray-400 transition-colors">
           LIVE DEPARTURE SCHEDULE
         </div>
 
         <div className="overflow-x-auto max-w-4xl">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="text-[11px] font-mono uppercase text-[#5B6478] tracking-wider">
+              <tr className="text-[11px] font-mono uppercase text-[#5B6478] dark:text-gray-400 tracking-wider transition-colors border-b border-[rgba(15,44,92,0.10)] dark:border-white/10">
                 <th className="py-2.5 pr-6 font-medium">TRAIN</th>
                 <th className="py-2.5 pr-6 font-medium">DESTINATION</th>
                 <th className="py-2.5 pr-6 font-medium">PLATFORM</th>
@@ -130,18 +103,18 @@ export const Analytics: React.FC = () => {
             </thead>
             <tbody className="text-xs">
               {departures.map((row) => (
-                <tr key={row.train} className="hover:bg-[#F8F9FB]/50 transition-colors">
-                  <td className="py-3.5 pr-6 font-mono font-medium text-[#0F2C5C]">
-                    {row.train}
+                <tr key={row.trainNo} className="hover:bg-[#F8F9FB]/50 dark:hover:bg-slate-800/50 transition-colors border-b border-[rgba(15,44,92,0.10)] dark:border-white/10 last:border-0">
+                  <td className="py-3.5 pr-6 font-mono font-medium text-[#0F2C5C] dark:text-gray-200">
+                    {row.trainNo}
                   </td>
-                  <td className="py-3.5 pr-6 font-medium text-[#0F2C5C]">
+                  <td className="py-3.5 pr-6 font-medium text-[#0F2C5C] dark:text-gray-200">
                     {row.destination}
                   </td>
-                  <td className="py-3.5 pr-6 font-mono font-medium text-[#0F2C5C]">
+                  <td className="py-3.5 pr-6 font-mono font-medium text-[#0F2C5C] dark:text-gray-200">
                     {row.platform}
                   </td>
-                  <td className="py-3.5 pr-6 font-mono text-[#0F2C5C]">
-                    {row.scheduled}
+                  <td className="py-3.5 pr-6 font-mono text-[#0F2C5C] dark:text-gray-200">
+                    {row.scheduledDeparture}
                   </td>
                   <td className="py-3.5">
                     <StatusBadge status={row.status} size="sm" />
