@@ -25,7 +25,7 @@ export const Header: React.FC = () => {
       
       {/* Left/Center: Greeting & Context */}
       <div className="flex items-center gap-6">
-        <h1 className="text-[15px] font-medium text-[#0F2C5C] dark:text-gray-100 transition-colors">
+        <h1 className="text-base font-medium text-[#0F2C5C] dark:text-gray-100 transition-colors">
           {getGreeting()}, {user?.name.split(' ')[0] || 'Arjun'}
         </h1>
         <div className="h-4 w-[1px] bg-[rgba(15,44,92,0.2)] dark:bg-white/20 hidden md:block"></div>
@@ -34,7 +34,7 @@ export const Header: React.FC = () => {
             className="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(30,127,79,0.8)]"
             style={{ backgroundColor: 'var(--color-accent)' }}
           ></span>
-          <span className="font-mono text-[11px] font-semibold tracking-wider text-[#5B6478] dark:text-gray-400 uppercase transition-colors">
+          <span className="font-mono text-xs font-semibold tracking-wider text-[#5B6478] dark:text-gray-400 uppercase transition-colors">
             NORTHERN ZONE · CENTRAL TRAFFIC CONTROL
           </span>
         </div>
@@ -52,7 +52,7 @@ export const Header: React.FC = () => {
         <div className="h-5 w-[1px] bg-[rgba(15,44,92,0.15)] dark:bg-white/20"></div>
 
         {/* Live IST Clock */}
-        <div className="font-mono text-[13px] text-[#0F2C5C] dark:text-gray-200 tracking-tight transition-colors">
+        <div className="font-mono text-sm text-[#0F2C5C] dark:text-gray-200 tracking-tight transition-colors">
           {istTime || '17:34:07 IST'}
         </div>
 
@@ -89,8 +89,12 @@ export const Header: React.FC = () => {
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2.5 p-1 rounded-none hover:bg-[#F8F9FB] dark:hover:bg-[#1E293B] transition-colors text-left"
           >
-            <div className="w-8 h-8 rounded-none bg-[#0F2C5C] dark:bg-slate-700 text-white flex items-center justify-center font-mono text-xs font-semibold transition-colors">
-              {user?.initials || 'AS'}
+            <div className="w-8 h-8 rounded-none overflow-hidden bg-[#0F2C5C] dark:bg-slate-700 text-white flex items-center justify-center font-mono text-xs font-semibold transition-colors">
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt={user.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              ) : (
+                user?.initials || 'AS'
+              )}
             </div>
             <div className="hidden md:flex flex-col">
               <span className="text-[13px] font-semibold leading-none text-[#0F2C5C] dark:text-gray-100 transition-colors">

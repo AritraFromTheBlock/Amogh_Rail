@@ -47,7 +47,7 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isAlertsOpen, setIsAlertsOpen] = useState<boolean>(false);
 
   const [settings, setSettings] = useState<SystemSettings>({
-    theme: 'Light',
+    theme: 'Dark',
     accentColor: '#0F2C5C',
     liveMonitoring: true,
     aiAssistance: true,

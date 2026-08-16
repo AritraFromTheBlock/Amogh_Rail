@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { SystemProvider, useSystem } from './context/SystemContext';
 import { ToastProvider } from './context/ToastContext';
 import { Layout } from './components/layout/Layout';
+import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Network } from './pages/Network';
@@ -16,9 +17,13 @@ import { SplashScreen } from './components/common/SplashScreen';
 const AppContent: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { activeNav } = useSystem();
+  const [showLogin, setShowLogin] = useState(false);
 
   if (!isAuthenticated) {
-    return <Login />;
+    if (showLogin) {
+      return <Login onBack={() => setShowLogin(false)} />;
+    }
+    return <Landing onNavigateLogin={() => setShowLogin(true)} />;
   }
 
   const renderActiveScreen = () => {
