@@ -102,6 +102,5 @@ export type ActiveNav =
   | 'Network'
   | 'Operations'
   | 'Optimization'
-  | 'Simulation'
   | 'Analytics'
   | 'Settings';

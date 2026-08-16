@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Lock, Mail, ArrowRight, ArrowLeft, Key, RefreshCw } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, ArrowRight, ArrowLeft, Key, RefreshCw, CheckCircle2 } from 'lucide-react';
 
 interface LoginProps {
   onBack?: () => void;
 }
 
 export const Login: React.FC<LoginProps> = ({ onBack }) => {
-  const { login, loginWithGoogle, isGoogleLoading } = useAuth();
+  const { 
+    prepareEmailLogin, 
+    signInWithGooglePending, 
+    complete2FA, 
+    isGoogleLoading,
+    pendingUser,
+    setPendingUser 
+  } = useAuth();
+
   const [step, setStep] = useState<'login' | '2fa'>('login');
   const [isSignIn, setIsSignIn] = useState(true);
   const [email, setEmail] = useState('arjun.sharma@railways.gov.in');
@@ -17,12 +25,21 @@ export const Login: React.FC<LoginProps> = ({ onBack }) => {
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    prepareEmailLogin(email);
     setStep('2fa');
+  };
+
+  const handleGoogleLogin = async () => {
+    const profile = await signInWithGooglePending();
+    if (profile) {
+      if (profile.email) setEmail(profile.email);
+      setStep('2fa');
+    }
   };
 
   const handle2FASubmit = () => {
     if (pin.join('') === '262026') {
-      login(email, password);
+      complete2FA();
     } else {
       alert("Invalid PIN. Use 262026 for demo.");
     }
@@ -30,6 +47,12 @@ export const Login: React.FC<LoginProps> = ({ onBack }) => {
 
   const autofill = () => {
     setPin(['2', '6', '2', '0', '2', '6']);
+  };
+
+  const handleBackToLogin = () => {
+    setStep('login');
+    setPendingUser(null);
+    setPin(['', '', '', '', '', '']);
   };
 
   return (
@@ -82,7 +105,7 @@ export const Login: React.FC<LoginProps> = ({ onBack }) => {
           )}
           {step === '2fa' && (
             <button 
-              onClick={() => setStep('login')}
+              onClick={handleBackToLogin}
               className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full"
               title="Back to Login"
             >
@@ -91,8 +114,8 @@ export const Login: React.FC<LoginProps> = ({ onBack }) => {
           )}
         </header>
 
-        {/* Centered Login Card - Pushed slightly upwards */}
-        <main className="flex-1 w-full px-8 pt-2 pb-6 flex flex-col justify-start items-center">
+        {/* Centered Login Card */}
+        <main className="flex-1 w-full px-8 pt-2 pb-6 flex flex-col justify-start items-center overflow-y-auto">
           
           {step === 'login' ? (
             <div className="w-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl p-6 rounded-3xl mt-4">
@@ -198,7 +221,7 @@ export const Login: React.FC<LoginProps> = ({ onBack }) => {
                 {/* Primary CTA Button */}
                 <button
                   type="submit"
-                  className="w-full h-11 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] mt-2"
+                  className="w-full h-11 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] mt-2 cursor-pointer"
                 >
                   <span>{isSignIn ? 'Sign In to Control Room' : 'Submit Operator Request'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -218,9 +241,9 @@ export const Login: React.FC<LoginProps> = ({ onBack }) => {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    onClick={loginWithGoogle}
+                    onClick={handleGoogleLogin}
                     disabled={isGoogleLoading}
-                    className="h-10 px-3 bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-wait"
+                    className="h-10 px-3 bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-wait cursor-pointer"
                   >
                     {isGoogleLoading ? (
                       <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -231,8 +254,11 @@ export const Login: React.FC<LoginProps> = ({ onBack }) => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setStep('2fa')}
-                    className="h-10 px-3 bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm"
+                    onClick={() => {
+                      prepareEmailLogin('operator.ir@railways.gov.in');
+                      setStep('2fa');
+                    }}
+                    className="h-10 px-3 bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                   >
                     <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
                     <span>IR-Gov</span>
@@ -248,38 +274,54 @@ export const Login: React.FC<LoginProps> = ({ onBack }) => {
 
             </div>
           ) : (
-            <div className="w-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl p-8 rounded-3xl mt-4 flex flex-col items-center animate-in fade-in zoom-in-95 duration-300">
+            <div className="w-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl p-7 rounded-3xl mt-4 flex flex-col items-center animate-in fade-in zoom-in-95 duration-300">
               
-              <div className="w-14 h-14 rounded-full border border-blue-400/30 flex items-center justify-center mb-5 bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+              <div className="w-13 h-13 rounded-full border border-blue-400/30 flex items-center justify-center mb-4 bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
                 <Key className="w-6 h-6 text-blue-400" />
               </div>
 
-              <h2 className="text-lg font-bold uppercase tracking-widest text-white mb-2 drop-shadow-sm">
+              <h2 className="text-lg font-bold uppercase tracking-widest text-white mb-1 drop-shadow-sm">
                 Two-Factor Auth
               </h2>
               
-              <p className="text-center text-xs text-white/70 mb-6 leading-relaxed">
-                Enter the 6-digit secure code sent to your<br/>registered email address to access the terminal.
+              {/* Authenticated Account Pill */}
+              {pendingUser && (
+                <div className="mb-4 flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/20 rounded-full text-xs text-white/90">
+                  {pendingUser.photoURL ? (
+                    <img src={pendingUser.photoURL} alt={pendingUser.name} className="w-4 h-4 rounded-full" />
+                  ) : pendingUser.provider === 'google' ? (
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-3.5 h-3.5" />
+                  ) : (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  )}
+                  <span className="font-medium text-[11px] truncate max-w-[200px]">
+                    {pendingUser.email || pendingUser.name}
+                  </span>
+                </div>
+              )}
+
+              <p className="text-center text-xs text-white/70 mb-5 leading-relaxed">
+                Enter the 6-digit security code to verify your identity and access the Northern Zone control room.
               </p>
 
-              <div className="w-full border border-blue-400/30 bg-blue-500/10 rounded-xl p-3 flex items-center justify-between mb-4 shadow-inner">
+              <div className="w-full border border-blue-400/30 bg-blue-500/10 rounded-xl p-3 flex items-center justify-between mb-3 shadow-inner">
                 <div className="flex items-center gap-2">
                   <Key className="w-3.5 h-3.5 text-blue-400" />
                   <span className="text-[10px] text-blue-300 font-medium tracking-wide">Demo Static PIN: <span className="font-bold text-xs text-blue-400">262026</span></span>
                 </div>
                 <button 
                   onClick={autofill}
-                  className="px-2.5 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[9px] font-bold uppercase rounded hover:bg-blue-500/30 transition-colors"
+                  className="px-2.5 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[9px] font-bold uppercase rounded hover:bg-blue-500/30 transition-colors cursor-pointer"
                 >
                   Auto-fill
                 </button>
               </div>
 
-              <p className="text-center text-[9px] text-blue-300/80 italic mb-6 px-2">
-                * Note: 262026 is a temporary demo PIN for evaluation. Dynamic OTP generation will be integrated in future releases.
+              <p className="text-center text-[9px] text-blue-300/80 italic mb-5 px-2">
+                * Note: 262026 is a demo security PIN. Dynamic OTP generation will be integrated in production.
               </p>
 
-              <div className="flex items-center justify-center gap-2 w-full mb-8">
+              <div className="flex items-center justify-center gap-2 w-full mb-6">
                 {pin.map((digit, i) => (
                   <input
                     key={i}
@@ -288,7 +330,7 @@ export const Login: React.FC<LoginProps> = ({ onBack }) => {
                     value={digit}
                     onChange={(e) => {
                       const newPin = [...pin];
-                      newPin[i] = e.target.value.replace(/\D/g, ''); // only numbers
+                      newPin[i] = e.target.value.replace(/\D/g, '');
                       setPin(newPin);
                       if (e.target.value && i < 5) {
                         const nextInput = document.getElementById(`pin-${i + 1}`);
@@ -309,18 +351,21 @@ export const Login: React.FC<LoginProps> = ({ onBack }) => {
 
               <button
                 onClick={handle2FASubmit}
-                className="w-full h-11 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] uppercase tracking-widest rounded-xl transition-all shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] flex items-center justify-center gap-2 mb-6"
+                className="w-full h-11 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] uppercase tracking-widest rounded-xl transition-all shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] flex items-center justify-center gap-2 mb-4 cursor-pointer"
               >
                 <span>Verify & Authenticate</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
               <div className="flex flex-col items-center gap-2">
-                <button className="flex items-center gap-2 text-[10px] text-white/50 hover:text-white/80 transition-colors uppercase tracking-widest">
+                <button 
+                  onClick={autofill}
+                  className="flex items-center gap-2 text-[10px] text-white/50 hover:text-white/80 transition-colors uppercase tracking-widest cursor-pointer"
+                >
                   <RefreshCw className="w-3 h-3" />
-                  <span>Resend Code in 26s</span>
+                  <span>Resend Code</span>
                 </button>
-                <div className="flex items-center gap-2 text-[9px] text-emerald-400 font-mono font-medium tracking-wider mt-4 pt-4 border-t border-white/10 w-full justify-center">
+                <div className="flex items-center gap-2 text-[9px] text-emerald-400 font-mono font-medium tracking-wider mt-3 pt-3 border-t border-white/10 w-full justify-center">
                   <ShieldCheck className="w-3 h-3" />
                   <span>SECURE VERIFICATION GATEWAY</span>
                 </div>

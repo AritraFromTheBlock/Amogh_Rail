@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSystem } from '../../context/SystemContext';
-import { Menu, LayoutDashboard, Network, Activity, Zap, MonitorPlay, BarChart3, Settings as SettingsIcon } from 'lucide-react';
+import { Menu, LayoutDashboard, Network, Activity, Zap, BarChart3, Settings as SettingsIcon } from 'lucide-react';
 import type { ActiveNav } from '../../types';
 
 interface NavItem {
@@ -14,7 +14,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'Network', label: 'Network', icon: Network },
   { id: 'Operations', label: 'Operations', icon: Activity },
   { id: 'Optimization', label: 'Optimization', icon: Zap },
-  { id: 'Simulation', label: 'Simulation', icon: MonitorPlay },
   { id: 'Analytics', label: 'Analytics', icon: BarChart3 },
   { id: 'Settings', label: 'Settings', icon: SettingsIcon },
 ];

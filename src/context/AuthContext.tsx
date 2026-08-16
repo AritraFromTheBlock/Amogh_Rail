@@ -9,13 +9,17 @@ export interface UserProfile {
   zone: string;
   email: string;
   photoURL?: string;
+  provider?: 'google' | 'password' | 'ir-gov';
 }
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user: UserProfile | null;
-  login: (email: string, pass: string) => void;
-  loginWithGoogle: () => Promise<void>;
+  pendingUser: UserProfile | null;
+  setPendingUser: (user: UserProfile | null) => void;
+  prepareEmailLogin: (email: string) => void;
+  signInWithGooglePending: () => Promise<UserProfile | null>;
+  complete2FA: (customUser?: UserProfile) => void;
   logout: () => void;
   isGoogleLoading: boolean;
 }
@@ -25,7 +29,8 @@ const DEFAULT_USER: UserProfile = {
   initials: 'AS',
   role: 'Cluster Controller',
   zone: 'Northern Zone Control Room',
-  email: 'arjun.sharma@railways.gov.in'
+  email: 'arjun.sharma@railways.gov.in',
+  provider: 'password'
 };
 
 const firebaseUserToProfile = (fbUser: User): UserProfile => {
@@ -41,7 +46,8 @@ const firebaseUserToProfile = (fbUser: User): UserProfile => {
     role: 'Cluster Controller',
     zone: 'Northern Zone Control Room',
     email: fbUser.email || '',
-    photoURL: fbUser.photoURL || undefined
+    photoURL: fbUser.photoURL || undefined,
+    provider: 'google'
   };
 };
 
@@ -58,17 +64,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
+  const [pendingUser, setPendingUser] = useState<UserProfile | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  // Listen to Firebase auth state
+  // Listen to Firebase auth state, but only auto-authenticate if 2FA was already verified (saved in localStorage)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
+      const is2FAComplete = localStorage.getItem('amogh_auth') === 'true';
+      if (firebaseUser && is2FAComplete) {
         const profile = firebaseUserToProfile(firebaseUser);
         setUser(profile);
         setIsAuthenticated(true);
-        localStorage.setItem('amogh_auth', JSON.stringify(true));
-        localStorage.setItem('amogh_user', JSON.stringify(profile));
       }
     });
     return () => unsubscribe();
@@ -78,48 +84,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('amogh_auth', JSON.stringify(isAuthenticated));
   }, [isAuthenticated]);
 
-  // Standard email/password login (demo)
-  const login = (email: string) => {
-    const profile = {
+  // Step 1: Prepare standard email/password login
+  const prepareEmailLogin = (email: string) => {
+    const profile: UserProfile = {
       ...DEFAULT_USER,
-      email: email || DEFAULT_USER.email
+      email: email || DEFAULT_USER.email,
+      provider: 'password'
     };
-    setUser(profile);
-    setIsAuthenticated(true);
-    localStorage.setItem('amogh_user', JSON.stringify(profile));
+    setPendingUser(profile);
   };
 
-  // Google Sign-In via Firebase
-  const loginWithGoogle = async () => {
+  // Step 1: Google Sign-In via Firebase (triggers 2FA flow next)
+  const signInWithGooglePending = async (): Promise<UserProfile | null> => {
     setIsGoogleLoading(true);
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const profile = firebaseUserToProfile(result.user);
-      setUser(profile);
-      setIsAuthenticated(true);
-      localStorage.setItem('amogh_user', JSON.stringify(profile));
+      setPendingUser(profile);
+      return profile;
     } catch (error: unknown) {
       const firebaseError = error as { code?: string; message?: string };
       console.error('Google sign-in error:', firebaseError.message);
-      // Don't throw – just let the user try again
       if (firebaseError.code !== 'auth/popup-closed-by-user') {
         alert(`Google Sign-In failed: ${firebaseError.message}`);
       }
+      return null;
     } finally {
       setIsGoogleLoading(false);
     }
+  };
+
+  // Step 2: Complete 2FA and grant full application access
+  const complete2FA = (customUser?: UserProfile) => {
+    const finalUser = customUser || pendingUser || DEFAULT_USER;
+    setUser(finalUser);
+    setIsAuthenticated(true);
+    setPendingUser(null);
+    localStorage.setItem('amogh_auth', JSON.stringify(true));
+    localStorage.setItem('amogh_user', JSON.stringify(finalUser));
   };
 
   const logout = () => {
     signOut(auth).catch(console.error);
     setIsAuthenticated(false);
     setUser(null);
+    setPendingUser(null);
     localStorage.removeItem('amogh_auth');
     localStorage.removeItem('amogh_user');
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, loginWithGoogle, logout, isGoogleLoading }}>
+    <AuthContext.Provider 
+      value={{ 
+        isAuthenticated, 
+        user, 
+        pendingUser, 
+        setPendingUser, 
+        prepareEmailLogin, 
+        signInWithGooglePending, 
+        complete2FA, 
+        logout, 
+        isGoogleLoading 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
