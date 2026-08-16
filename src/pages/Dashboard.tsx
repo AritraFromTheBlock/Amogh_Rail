@@ -161,7 +161,7 @@ export const Dashboard: React.FC = () => {
             onClick={() => {
               // Placeholder ready for the simulation external link redirect
               addToast('Opening Traffic Simulation...', 'info');
-              // window.open('SIMULATION_URL_HERE', '_blank');
+              window.open('https://ml-simulation-w6oc.vercel.app/', '_blank');
             }}
             className="w-full sm:w-auto px-6 py-3 bg-sky-500 hover:bg-sky-400 active:bg-sky-600 text-white text-sm font-semibold rounded-lg shadow-lg hover:shadow-sky-500/25 flex items-center justify-center gap-2.5 transition-all duration-200 cursor-pointer group"
           >

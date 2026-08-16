@@ -30,3 +30,4 @@ train_delay_dataset*.csv
 *.csv
 newTrains.json
 remove_bg.cjs
+.vercel
